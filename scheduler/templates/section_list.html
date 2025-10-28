@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sections</title>
+</head>
+<body>
+    <h1>Course Sections</h1>
+    <ul>
+        {% for section in sections %}
+            <li>{{ section.course.code }} - {{ section.section_number }} ({{ section.days }} {{ section.start_time }}-{{ section.end_time }})</li>
+        {% empty %}
+            <li>No sections available.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

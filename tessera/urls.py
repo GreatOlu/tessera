@@ -16,7 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from scheduler import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('courses/', views.course_list, name='course_list'),
+    path('sections/', views.section_list, name='section_list'),
 ]
