@@ -24,5 +24,5 @@ urlpatterns = [
     path('sections/', views.section_list, name='section_list'),
     path('add-course/', views.add_course, name='add_course'),
     path('check-conflict/', views.check_conflict_demo, name='check_conflict_demo'),
-
+    path('generate-schedules/', views.generate_schedules, name='generate_schedules'),
 ]
