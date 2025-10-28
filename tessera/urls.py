@@ -23,4 +23,6 @@ urlpatterns = [
     path('courses/', views.course_list, name='course_list'),
     path('sections/', views.section_list, name='section_list'),
     path('add-course/', views.add_course, name='add_course'),
+    path('check-conflict/', views.check_conflict_demo, name='check_conflict_demo'),
+
 ]

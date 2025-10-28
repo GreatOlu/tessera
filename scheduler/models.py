@@ -1,4 +1,5 @@
 from django.db import models
+from multiselectfield import MultiSelectField
 
 class Student(models.Model):
     name = models.CharField(max_length=100)
@@ -17,10 +18,18 @@ class Course(models.Model):
 
 
 class CourseSection(models.Model):
+    DAYS = [
+        ('M', 'Monday'),
+        ('T', 'Tuesday'),
+        ('W', 'Wednesday'),
+        ('Th', 'Thursday'),
+        ('F', 'Friday'),
+    ]
+
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="sections")
-    section_number = models.CharField(max_length=10)  # e.g., 01
+    section_number = models.CharField(max_length=10)
     instructor = models.CharField(max_length=100, blank=True)
-    days = models.CharField(max_length=20)  # e.g., M/W or T/Th
+    days = MultiSelectField(choices=DAYS)
     start_time = models.TimeField()
     end_time = models.TimeField()
 
@@ -36,3 +45,7 @@ class Enrollment(models.Model):
 
     def __str__(self):
         return f"{self.student.name} -> {self.section}"
+
+
+
+
