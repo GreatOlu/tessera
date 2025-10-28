@@ -65,8 +65,8 @@ def check_conflict_demo(request):
 
 def generate_schedules(request):
     """
-    Generate all possible non-conflicting combinations of course sections,
-    ensuring that no schedule contains multiple sections of the same course.
+    Generate all valid non-conflicting schedules that include
+    between 12 and 18 total credits.
     """
     sections = list(CourseSection.objects.select_related('course'))
 
@@ -75,15 +75,14 @@ def generate_schedules(request):
 
     valid_combinations = []
 
-    # Try combinations of 2–5 sections for demo (you can adjust this range)
     for r in range(2, min(6, len(sections) + 1)):
         for combo in itertools.combinations(sections, r):
-            # Skip if this combination has multiple sections of the same course
+            # Avoid duplicate courses in the same schedule
             course_ids = [s.course.id for s in combo]
             if len(course_ids) != len(set(course_ids)):
                 continue
 
-            # Check if this combination has any conflicts
+            # Check for time conflicts
             conflict_found = False
             for i in range(len(combo)):
                 for j in range(i + 1, len(combo)):
@@ -93,18 +92,25 @@ def generate_schedules(request):
                 if conflict_found:
                     break
 
-            if not conflict_found:
-                valid_combinations.append(combo)
+            if conflict_found:
+                continue
+
+            # Calculate total credits
+            total_credits = sum(s.course.credits for s in combo)
+
+            # Filter schedules by credit range (12–18)
+            if 12 <= total_credits <= 18:
+                valid_combinations.append((combo, total_credits))
 
     if not valid_combinations:
-        return HttpResponse("No valid (non-conflicting) schedules found.")
+        return HttpResponse("No valid schedules found within 12–18 credits.")
 
-    # Build HTML output
-    message = "<h2>✅ Valid Non-Conflicting Schedules:</h2>"
-    for combo in valid_combinations:
-        message += "<ul>"
+    # Display valid schedules with their total credits
+    message = "<h2>✅ Valid Schedules (12–18 credits):</h2>"
+    for combo, credits in valid_combinations:
+        message += f"<p><strong>Total Credits: {credits}</strong></p><ul>"
         for s in combo:
-            message += f"<li>{s}</li>"
+            message += f"<li>{s} ({s.course.credits} credits)</li>"
         message += "</ul>"
 
     return HttpResponse(message)

@@ -12,6 +12,7 @@ class Student(models.Model):
 class Course(models.Model):
     code = models.CharField(max_length=20)  # e.g., CSCI-210
     title = models.CharField(max_length=200)
+    credits = models.IntegerField(default=3)  # NEW FIELD
 
     def __str__(self):
         return f"{self.code} - {self.title}"
