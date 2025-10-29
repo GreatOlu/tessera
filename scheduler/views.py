@@ -106,7 +106,7 @@ def generate_schedules(request):
         return HttpResponse("No valid schedules found within 12–18 credits.")
 
     # Display valid schedules with their total credits
-    message = "<h2>✅ Valid Schedules (12–18 credits):</h2>"
+    message = "<h2>Valid Schedules (12–18 credits):</h2>"
     for combo, credits in valid_combinations:
         message += f"<p><strong>Total Credits: {credits}</strong></p><ul>"
         for s in combo:
