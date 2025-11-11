@@ -1,18 +1,67 @@
 import { useEffect, useState } from "react";
+import CourseForm from "./components/CourseForm.jsx";
+import SectionForm from "./components/SectionForm.jsx";
 
 export default function App() {
   const [courses, setCourses] = useState([]);
-  const [selected, setSelected] = useState([]);
-  const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // fetch courses on load
+  const [selected, setSelected] = useState(() => {
+    try {
+      const saved = localStorage.getItem("selectedCourses");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+});
+
+  const [schedules, setSchedules] = useState(() => {
+    try {
+      const saved = localStorage.getItem("lastSchedules");
+      return saved ? JSON.parse(saved).items : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [generatedAt, setGeneratedAt] = useState(() => {
+    try {
+      const saved = localStorage.getItem("lastSchedules");
+      return saved ? JSON.parse(saved).generatedAt : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const fetchCourses = () => {
+    fetch("/api/courses/")
+      .then((r) => r.json())
+      .then(setCourses)
+      .catch((e) => console.error("Courses fetch failed:", e));
+  };
+
   useEffect(() => {
-    fetch("/api/courses/")       // thanks to Vite proxy
+    localStorage.setItem("selectedCourses", JSON.stringify(selected));
+  }, [selected]);
+
+  useEffect(() => {
+    fetch("/api/courses/")
       .then((r) => r.json())
       .then(setCourses)
       .catch((e) => console.error("Courses fetch failed:", e));
   }, []);
+
+  useEffect(() => {
+    if (schedules && schedules.length > 0) {
+      localStorage.setItem(
+        "lastSchedules",
+        JSON.stringify({ generatedAt: new Date().toISOString(), items: schedules })
+      );
+    } else {
+      localStorage.removeItem("lastSchedules");
+    }
+  }, [schedules]);
+
 
   const toggle = (id) =>
     setSelected((prev) =>
@@ -27,17 +76,35 @@ export default function App() {
       body: JSON.stringify({ selected_courses: selected }),
     })
       .then((r) => r.json())
-      .then(setSchedules)
+      .then((data) => {
+        setSchedules(data);
+        setGeneratedAt(new Date().toISOString());
+      })
       .catch((e) => console.error("Generate failed:", e))
       .finally(() => setLoading(false));
   };
 
+  
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow p-6">
         <h1 className="text-3xl font-bold text-indigo-600 mb-6 text-center">
           Tessera Schedule Planner
         </h1>
+
+        <CourseForm
+          onCreated={(createdCourse) => {
+            fetchCourses();
+          }}
+        />
+
+        <SectionForm
+          courses={courses}
+          onCreated={(createdSection) => {
+            // TODO: use toast
+            console.log("Section created:", createdSection);
+          }}
+        />
 
         <h2 className="text-xl font-semibold mb-3">Select Courses</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
@@ -59,6 +126,8 @@ export default function App() {
           ))}
         </div>
 
+
+
         <button
           onClick={generate}
           disabled={loading || selected.length === 0}
@@ -66,8 +135,29 @@ export default function App() {
         >
           {loading ? "Generating..." : "Generate Schedules"}
         </button>
+        <button
+          onClick={() => { setSchedules([]); setGeneratedAt(null); }}
+          className="ml-3 text-sm text-gray-600 hover:text-gray-900 underline"
+        >
+          Clear results
+        </button>
 
-        <h2 className="text-xl font-semibold mt-8 mb-3">Valid Schedules</h2>
+                  <div className="mt-6 flex items-center justify-between">
+          <h2 className="text-xl font-semibold">
+            Valid Schedules
+            {schedules.length > 0 && (
+              <span className="ml-2 text-indigo-600">
+                — Found {schedules.length} schedule{schedules.length !== 1 ? "s" : ""} 🎉
+              </span>
+            )}
+          </h2>
+
+          {generatedAt && (
+            <span className="text-sm text-gray-500">
+              Last generated: {new Date(generatedAt).toLocaleString()}
+            </span>
+          )}
+        </div>
         {schedules.length === 0 ? (
           <p className="text-gray-500">
             {loading ? "Working..." : "No schedules yet."}

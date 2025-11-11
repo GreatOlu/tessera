@@ -16,18 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from scheduler import views, views_api
+from scheduler import views_api
 from rest_framework.documentation import include_docs_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('courses/', views.course_list, name='course_list'),
-    path('sections/', views.section_list, name='section_list'),
-    path('add-course/', views.add_course, name='add_course'),
-    path('check-conflict/', views.check_conflict_demo, name='check_conflict_demo'),
-    path('generate-schedules/', views.generate_schedules, name='generate_schedules'),
     path('api/courses/', views_api.get_courses),
+    path('api/courses/create/', views_api.create_course),
     path('api/sections/', views_api.get_sections),
+    path('api/sections/create/', views_api.create_section),
     path('api/generate-schedules/', views_api.generate_schedules_api),
     path('api/docs/', include_docs_urls(title='Tessera API')),
 ]
