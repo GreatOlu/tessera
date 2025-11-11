@@ -1,2 +1,11 @@
+# Python / Django
+__pycache__/
+*.pyc
 *.sqlite3
+.env
 .venv/
+
+# Node / React
+tessera-ui/node_modules/
+tessera-ui/build/
+tessera-ui/.env
