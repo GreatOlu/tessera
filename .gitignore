@@ -1,11 +1,12 @@
-# Python / Django
+# Python/Django
+.venv/
 __pycache__/
 *.pyc
-*.sqlite3
+db.sqlite3
 .env
-.venv/
 
-# Node / React
+# Node/Vite
 tessera-ui/node_modules/
-tessera-ui/build/
+tessera-ui/dist/
 tessera-ui/.env
+.DS_Store
