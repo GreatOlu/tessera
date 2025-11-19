@@ -8,8 +8,8 @@ const DAYS = [
   { code: "F", label: "Fri" },
 ];
 
-const START_HOUR = 8;
-const END_HOUR = 18;
+const START_HOUR = 6;
+const END_HOUR = 21;
 const HOUR_HEIGHT = 50;
 const PX_PER_MIN = HOUR_HEIGHT / 60;
 
