@@ -227,8 +227,99 @@ export default function App() {
         )}
 
         {schedules.length > 0 && (
-          <WeekCalendar schedule={schedules[0]} />
+          <>
+            <ScheduleSummary schedule={schedules[0]} />
+            <WeekCalendar schedule={schedules[0]} />
+          </>
         )}
+      </div>
+    </div>
+  );
+}
+
+function ScheduleSummary({ schedule }) {
+  if (!schedule || !schedule.sections || schedule.sections.length === 0) {
+    return null;
+  }
+
+  const sections = schedule.sections;
+
+  const totalCredits =
+    schedule.total_credits ??
+    sections.reduce(
+      (sum, s) => sum + (s.course?.credits ?? 0),
+      0
+    );
+
+  const dayOrder = { M: 0, T: 1, W: 2, Th: 3, F: 4 };
+  const dayLabel = { M: "Mon", T: "Tue", W: "Wed", Th: "Thu", F: "Fri" };
+
+  const dayCounts = {};
+
+  const normalizeDays = (d) => {
+    if (!d) return [];
+    if (Array.isArray(d)) return d;
+    return String(d)
+      .split(",")
+      .map((x) => x.trim())
+      .filter(Boolean);
+  };
+
+  sections.forEach((s) => {
+    normalizeDays(s.days).forEach((d) => {
+      dayCounts[d] = (dayCounts[d] || 0) + 1;
+    });
+  });
+
+  const daysWithClasses = Object.keys(dayCounts).sort(
+    (a, b) => (dayOrder[a] ?? 99) - (dayOrder[b] ?? 99)
+  );
+  const maxClassesPerDay = daysWithClasses.length
+    ? Math.max(...daysWithClasses.map((d) => dayCounts[d]))
+    : 0;
+
+  // earliest / latest
+  let earliestStart = null;
+  let latestEnd = null;
+
+  sections.forEach((s) => {
+    if (s.start_time) {
+      if (!earliestStart || s.start_time < earliestStart) {
+        earliestStart = s.start_time;
+      }
+    }
+    if (s.end_time) {
+      if (!latestEnd || s.end_time > latestEnd) {
+        latestEnd = s.end_time;
+      }
+    }
+  });
+
+  const formattedDays = daysWithClasses
+    .map((d) => dayLabel[d] || d)
+    .join(", ");
+
+  return (
+    <div className="mt-4 mb-4 border rounded-lg bg-gray-50 p-3 text-sm">
+      <div>
+        <span className="font-semibold">Total credits:</span>{" "}
+        {totalCredits}
+      </div>
+      <div>
+        <span className="font-semibold">Days with classes:</span>{" "}
+        {daysWithClasses.length > 0 ? formattedDays : "None"}
+      </div>
+      <div>
+        <span className="font-semibold">Max classes in a day:</span>{" "}
+        {maxClassesPerDay}
+      </div>
+      <div>
+        <span className="font-semibold">Earliest start:</span>{" "}
+        {earliestStart || "—"}
+      </div>
+      <div>
+        <span className="font-semibold">Latest end:</span>{" "}
+        {latestEnd || "—"}
       </div>
     </div>
   );

@@ -57,12 +57,15 @@ export default function WeekCalendar({ schedule }) {
 
   return (
     <div className="mt-8">
-      <h2 className="text-xl font-semibold mb-2">
-        Weekly Calendar View{" "}
+        {/*
+        <h2 className="text-xl font-semibold mb-2">
+        Weekly Calendar {" "}
         <span className="text-indigo-600 text-base">
           ({schedule.total_credits} credits)
         </span>
       </h2>
+        */}
+      
 
       <div className="flex border rounded-xl bg-white overflow-hidden">
         {/* Time column */}
