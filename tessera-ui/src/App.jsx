@@ -4,6 +4,39 @@ import SectionForm from "./components/SectionForm.jsx";
 import WeekCalendar from "./components/WeekCalendar.jsx";
 import PreferencesForm from "./components/PreferencesForm.jsx";
 
+function buildNoScheduleMessage(preferences) {
+  const prefs = preferences || {};
+
+  let msg = "No schedule could be generated with these preferences.";
+
+  const suggestions = [];
+
+  if (prefs.earliest_start) {
+    suggestions.push(
+      `allowing classes earlier than ${prefs.earliest_start}`
+    );
+  }
+
+  if (prefs.avoid_days && prefs.avoid_days.length >= 2) {
+    suggestions.push("avoiding fewer days");
+  }
+
+  const maxPerDay = Number(prefs.max_classes_per_day);
+  if (!Number.isNaN(maxPerDay) && maxPerDay > 0 && maxPerDay <= 2) {
+    suggestions.push("increasing the maximum number of classes per day");
+  }
+
+  if (prefs.preferred_time) {
+    suggestions.push("removing the preferred time-of-day preference");
+  }
+
+  if (suggestions.length > 0) {
+    msg += " Try " + suggestions.join(", ") + ".";
+  }
+
+  return msg;
+}
+
 export default function App() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -103,17 +136,32 @@ export default function App() {
         preferences: preferences,
       }),
     })
-      .then((r) => r.json())
+      .then(async (r) => {
+        // Try to read JSON safely, even if body is empty
+        let data = null;
+        try {
+          const text = await r.text();
+          if (text) {
+            data = JSON.parse(text);
+          } else {
+            data = null;
+          }
+        } catch (e) {
+          console.error("Failed to parse JSON:", e);
+          data = null;
+        }
+        return data;
+      })
       .then((data) => {
         if (data && data.sections) {
+          // got a valid schedule
           setSchedules([data]);
           setGeneratedAt(new Date().toISOString());
         } else {
+          // treat "no data" or empty response as "no schedule"
           setSchedules([]);
           setGeneratedAt(null);
-          setError(
-            "No schedule could be generated with these preferences. Try relaxing one or two constraints."
-          );
+          setError(buildNoScheduleMessage(preferences));
         }
       })
       .catch((e) => {
@@ -124,6 +172,7 @@ export default function App() {
       })
       .finally(() => setLoading(false));
   };
+     
 
   const clearResults = () => {
     setSchedules([]);
