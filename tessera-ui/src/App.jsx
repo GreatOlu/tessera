@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import CourseForm from "./components/CourseForm.jsx";
 import SectionForm from "./components/SectionForm.jsx";
+import ScheduleGrid from "./components/ScheduleGrid.jsx";
+import WeekCalendar from "./components/WeekCalendar.jsx";
 
 export default function App() {
   const [courses, setCourses] = useState([]);
@@ -142,7 +144,7 @@ export default function App() {
           Clear results
         </button>
 
-                  <div className="mt-6 flex items-center justify-between">
+        <div className="mt-6 flex items-center justify-between">
           <h2 className="text-xl font-semibold">
             Valid Schedules
             {schedules.length > 0 && (
@@ -158,29 +160,17 @@ export default function App() {
             </span>
           )}
         </div>
+
+        {schedules.length > 0 && (
+          <WeekCalendar schedule={schedules[0]} />
+        )}
+
         {schedules.length === 0 ? (
           <p className="text-gray-500">
             {loading ? "Working..." : "No schedules yet."}
           </p>
         ) : (
-          <div className="space-y-4">
-            {schedules.map((s, i) => (
-              <div key={i} className="border rounded-lg p-4 bg-gray-50">
-                <h3 className="text-lg font-semibold text-indigo-600">
-                  Total Credits: {s.total_credits}
-                </h3>
-                <ul className="list-disc list-inside text-gray-700 mt-2">
-                  {s.sections.map((sec) => (
-                    <li key={sec.id}>
-                      {sec.course.code}-{sec.section_number} |{" "}
-                      {Array.isArray(sec.days) ? sec.days.join(", ") : sec.days} |{" "}
-                      {sec.start_time}–{sec.end_time}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+          <ScheduleGrid schedules={schedules} />
         )}
       </div>
     </div>
